@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "../parsers/envelope_from_parser"
 
 # require 'date'
@@ -10,11 +9,12 @@ module Mail
     def initialize(string)
       envelope_from = Mail::Parsers::EnvelopeFromParser.parse(string)
       @address = envelope_from.address
+      # TODO: Fix date parsing...
       @date_time = Time.now # .parse(envelope_from.ctime_date) if envelope_from.ctime_date
     end
 
     # RFC 4155:
-    #   a timestamp indicating the UTC date and time when the message
+    #   A timestamp indicating the UTC date and time when the message
     #   was originally received, conformant with the syntax of the
     #   traditional UNIX 'ctime' output sans timezone (note that the
     #   use of UTC precludes the need for a timezone indicator);

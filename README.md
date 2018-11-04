@@ -34,4 +34,4 @@ TODO: Write development instructions here
 
 ## Contributors
 
-- [zaidakram](https://github.com/zaidakram) Zaid Akram - creator, maintainer
+- Zaid Akram ([@zaidakram](https://github.com/zaidakram)) - Creator, Maintainer
