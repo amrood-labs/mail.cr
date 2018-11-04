@@ -52,6 +52,47 @@ module Mail
       header["to"] = val
     end
 
+    # Returns the From value of the mail object as an array of strings of
+    # address specs.
+    #
+    # Example:
+    #
+    #  mail.from = 'Mikel <mikel@test.lindsaar.net>'
+    #  mail.from #=> ['mikel@test.lindsaar.net']
+    #  mail.from = 'Mikel <mikel@test.lindsaar.net>, ada@test.lindsaar.net'
+    #  mail.from #=> ['mikel@test.lindsaar.net', 'ada@test.lindsaar.net']
+    #
+    # Also allows you to set the value by passing a value as a parameter
+    #
+    # Example:
+    #
+    #  mail.from 'Mikel <mikel@test.lindsaar.net>'
+    #  mail.from #=> ['mikel@test.lindsaar.net']
+    #
+    # Additionally, you can append new addresses to the returned Array like
+    # object.
+    #
+    # Example:
+    #
+    #  mail.from 'Mikel <mikel@test.lindsaar.net>'
+    #  mail.from << 'ada@test.lindsaar.net'
+    #  mail.from #=> ['mikel@test.lindsaar.net', 'ada@test.lindsaar.net']
+    def from(val = nil)
+      default "from", val
+    end
+
+    # Sets the From value of the mail object, pass in a string of the field
+    #
+    # Example:
+    #
+    #  mail.from = 'Mikel <mikel@test.lindsaar.net>'
+    #  mail.from #=> ['mikel@test.lindsaar.net']
+    #  mail.from = 'Mikel <mikel@test.lindsaar.net>, ada@test.lindsaar.net'
+    #  mail.from #=> ['mikel@test.lindsaar.net', 'ada@test.lindsaar.net']
+    def from=(val)
+      header["from"] = val
+    end
+
     # Returns the default value of the field requested as a symbol.
     #
     # Each header field has a :default method which returns the most common use case for

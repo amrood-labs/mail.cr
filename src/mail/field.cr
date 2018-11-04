@@ -44,7 +44,7 @@ module Mail
       # "comments" => CommentsField,
       # "keywords" => KeywordsField,
       # "date" => DateField,
-      # "from" => FromField,
+      "from" => FromField,
       # "sender" => SenderField,
       # "reply-to" => ReplyToField,
       # "resent-date" => ResentDateField,
@@ -65,11 +65,15 @@ module Mail
       # "content-location" => ContentLocationField,
     }
 
-    FIELD_NAME_MAP = {} of String => String
+    macro process_fields_name_map
+      FIELD_NAME_MAP = {
+        {% for key, value in FIELDS_MAP %}
+          "{{key.id}}" => {{value.id}}.field_name,
+        {% end %}
+      }
+    end
 
-    {% for key, value in FIELDS_MAP %}
-      FIELD_NAME_MAP[{{key}}] = {{value.id}}.field_name
-    {% end %}
+    process_fields_name_map()
 
     # Generic Field Exception
     class FieldError < Exception

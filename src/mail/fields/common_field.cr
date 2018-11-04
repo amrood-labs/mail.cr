@@ -2,6 +2,9 @@ require "../constants"
 
 module Mail
   class CommonField # :nodoc:
+
+    @@field_name : String = ""
+
     def self.singular?
       false
     end
