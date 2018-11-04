@@ -1,0 +1,9 @@
+name: mail
+version: 0.1.0
+
+authors:
+  - Zaid Akram <zaid@amrood.de>
+
+crystal: 0.26.1
+
+license: MIT
