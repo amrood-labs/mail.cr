@@ -1,16 +1,15 @@
 require "./named_structured_field"
 
 module Mail
-  class AddressContainer < Array(Address) # :nodoc:
-    def initialize(field, list = nil)
-      @field = field
-      super list if list
-    end
+  # TODO: Fix container class...
+  # class AddressContainer < Array(String) # :nodoc:
 
-    def <<(address)
-      @field << address
-    end
-  end
+  #   setter field : CommonAddressField? = nil
+
+  #   def <<(address : String)
+  #     self.push address
+  #   end
+  # end
 
   class CommonAddressField < NamedStructuredField # :nodoc:
 
@@ -45,26 +44,22 @@ module Mail
 
     # Returns the address string of all the addresses in the address list
     def addresses
-      list = element.addresses.map { |a| a.address }
-      Mail::AddressContainer.new(self, list)
+      element.addresses.map { |a| a.address }
     end
 
     # Returns the formatted string of all the addresses in the address list
     def formatted
-      list = element.addresses.map { |a| a.format }
-      Mail::AddressContainer.new(self, list)
+      element.addresses.map { |a| a.format }
     end
 
     # Returns the display name of all the addresses in the address list
     def display_names
-      list = element.addresses.map { |a| a.display_name }
-      Mail::AddressContainer.new(self, list)
+      element.addresses.map { |a| a.display_name }
     end
 
     # Returns the actual address objects in the address list
     def addrs
-      list = element.addresses
-      Mail::AddressContainer.new(self, list)
+      element.addresses.map { |a| a }
     end
 
     # Returns a hash of group name => address strings for the address list
@@ -129,7 +124,7 @@ module Mail
 
     def do_encode
       return "" if Utilities.blank?(value)
-      address_array = element.addresses.reject { |a| encoded_group_addresses.include?(a.encoded) }.compact.map { |a| a.encoded }
+      address_array = element.addresses.reject { |a| encoded_group_addresses.includes?(a.encoded) }.compact.map { |a| a.encoded }
       address_text = address_array.join(", \r\n\s")
       group_array = groups.map { |k, v| "#{k}: #{v.map { |a| a.encoded }.join(", \r\n\s")};" }
       group_text = group_array.join(" \r\n\s")
@@ -139,7 +134,7 @@ module Mail
 
     def do_decode
       return nil if Utilities.blank?(value)
-      address_array = element.addresses.reject { |a| decoded_group_addresses.include?(a.decoded) }.map { |a| a.decoded }
+      address_array = element.addresses.reject { |a| decoded_group_addresses.includes?(a.decoded) }.map { |a| a.decoded }
       address_text = address_array.join(", ")
       group_array = groups.map { |k, v| "#{k}: #{v.map { |a| a.decoded }.join(", ")};" }
       group_text = group_array.join(" ")

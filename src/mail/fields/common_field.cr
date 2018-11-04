@@ -58,6 +58,14 @@ module Mail
       do_encode
     end
 
+    def do_decode
+      ""
+    end
+
+    def do_encode
+      ""
+    end
+
     def responsible_for?(field_name)
       name.to_s.casecmp(field_name.to_s) == 0
     end

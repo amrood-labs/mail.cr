@@ -63,7 +63,11 @@ module Mail
       if val
         header[str] = val
       elsif field = header ? header.not_nil![str] : nil
-        field
+        if field.is_a? Array
+          field.map { |f| f.default }
+        else
+          field.default
+        end
       end
     end
 

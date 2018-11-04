@@ -36,7 +36,7 @@ module Mail
     # Returns the raw input of the passed in string, this is before it is passed
     # by the parser.
     def raw
-      @data.raw
+      @data.nil? ? nil : @data.not_nil!.raw
     end
 
     # Returns a correctly formatted address for the email going out.  If given
@@ -89,7 +89,8 @@ module Mail
     def display_name(output_type = :decode)
       parse unless @parsed
       @display_name ||= get_display_name
-      Encodings.decode_encode(@display_name.to_s, output_type) if @display_name
+      # TODO: Fix encoding issus...
+      # Encodings.decode_encode(@display_name.to_s, output_type) if @display_name
     end
 
     # Provides a way to assign a display name to an already made Mail::Address object.
@@ -109,7 +110,9 @@ module Mail
     #  a.local #=> 'mikel'
     def local(output_type = :decode)
       parse unless @parsed
-      Encodings.decode_encode("#{@data.obs_domain_list}#{get_local.strip}", output_type) if get_local
+      "#{@data.nil? ? nil : @data.not_nil!.obs_domain_list}#{get_local.to_s.strip}"
+      # TODO: Fix encoding issus...
+      # Encodings.decode_encode("#{@data.obs_domain_list}#{get_local.strip}", output_type) if get_local
     end
 
     # Returns the domain part (the right hand side of the @ sign in the email address) of
@@ -119,7 +122,9 @@ module Mail
     #  a.domain #=> 'test.lindsaar.net'
     def domain(output_type = :decode)
       parse unless @parsed
-      Encodings.decode_encode(strip_all_comments(get_domain), output_type) if get_domain
+      # TODO: Fix encoding issus...
+      strip_all_comments(get_domain.to_s)
+      # Encodings.decode_encode(strip_all_comments(get_domain), output_type) if get_domain
     end
 
     # Returns an array of comments that are in the email, or nil if there
@@ -177,7 +182,7 @@ module Mail
     end
 
     def group
-      @data && @data.group
+      @data.nil? ? nil : @data.not_nil!.group
     end
 
     private def parse(value = nil)
@@ -195,9 +200,9 @@ module Mail
       end
     end
 
-    private def strip_all_comments(string)
+    private def strip_all_comments(string : String)
       unless Utilities.blank?(comments)
-        comments.each do |comment|
+        comments.not_nil!.each do |comment|
           string = string.gsub("(#{comment})", Constants::EMPTY)
         end
       end
@@ -206,8 +211,8 @@ module Mail
 
     private def strip_domain_comments(value)
       unless Utilities.blank?(comments)
-        comments.each do |comment|
-          if @data.domain && @data.domain.include?("(#{comment})")
+        comments.not_nil!.each do |comment|
+          if @data.nil? ? nil : @data.not_nil!.domain && @data.not_nil!.domain.to_s.includes?("(#{comment})")
             value = value.gsub("(#{comment})", Constants::EMPTY)
           end
         end
@@ -216,10 +221,10 @@ module Mail
     end
 
     private def get_display_name
-      if @data && @data.display_name
-        str = strip_all_comments(@data.display_name.to_s)
-      elsif @data && @data.comments && @data.domain
-        str = strip_domain_comments(format_comments)
+      if display_name = @data.nil? ? nil : @data.not_nil!.display_name
+        str = strip_all_comments(display_name.to_s)
+      elsif @data.nil? ? nil : @data.not_nil!.comments && @data.not_nil!.domain
+        str = strip_domain_comments(format_comments.to_s)
       end
       str unless Utilities.blank?(str)
     end
@@ -236,7 +241,7 @@ module Mail
 
     private def format_comments
       if comments
-        comment_text = comments.map { |c| Utilities.escape_paren(c) }.join(Constants::SPACE).squeeze(Constants::SPACE)
+        comment_text = comments.not_nil!.map { |c| Utilities.escape_paren(c) }.join(Constants::SPACE).squeeze(Constants::SPACE)
         @format_comments ||= "(#{comment_text})"
       else
         nil
@@ -244,15 +249,15 @@ module Mail
     end
 
     private def get_local
-      @data && @data.local
+      @data.nil? ? nil : @data.not_nil!.local
     end
 
     private def get_domain
-      @data && @data.domain
+      @data.nil? ? nil : @data.not_nil!.domain
     end
 
     private def get_comments
-      @data && @data.comments
+      @data.nil? ? nil : @data.not_nil!.comments
     end
   end
 end

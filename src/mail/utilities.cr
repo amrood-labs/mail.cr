@@ -4,6 +4,35 @@ module Mail
   module Utilities
     extend self
 
+    # If the string supplied has PHRASE unsafe characters in it, will return the string quoted
+    # in double quotes, otherwise returns the string unmodified
+    # TODO: Fix the quotation of unsafe phrases...
+    def quote_phrase(str)
+      # if str.respond_to?(:force_encoding)
+      #   original_encoding = str.encoding
+      #   ascii_str = str.to_s.dup.force_encoding('ASCII-8BIT')
+      #   if Constants::PHRASE_UNSAFE === ascii_str
+      #     dquote(ascii_str).force_encoding(original_encoding)
+      #   else
+      #     str
+      #   end
+      # else
+      #   Constants::PHRASE_UNSAFE === str ? dquote(str) : str
+      # end
+      str
+    end
+
+    # Escape parenthesies in a string
+    #
+    # Example:
+    #
+    #  str = 'This is (a) string'
+    #  escape_paren( str ) #=> 'This is \(a\) string'
+    def escape_paren(str)
+      re = /(?<!\\)([\(\)])/ # Only match unescaped parens
+      str.gsub(re) { |s| '\\' + s }
+    end
+
     # Removes any \-escaping.
     #
     # Example:
@@ -23,7 +52,7 @@ module Mail
       string.gsub(TO_CRLF_REGEX, Constants::CRLF)
     end
 
-    def self.safe_for_line_ending_conversion?(string) # :nodoc:
+    def self.safe_for_line_ending_conversion?(string)
       string.valid_encoding?
     end
 
@@ -56,7 +85,7 @@ module Mail
     #
     # This logic is mostly shared with ActiveSupport's blank?
     def blank?(value)
-      if typeof(value) == Nil
+      if typeof(value) == Nil || value.is_a? Nil
         true
       elsif typeof(value) == String
         value !~ /\S/

@@ -1,4 +1,4 @@
-require "mail/parsers/address_lists_parser"
+require "../parsers/address_lists_parser"
 
 module Mail
   class AddressList # :nodoc:
@@ -28,7 +28,7 @@ module Mail
     end
 
     def addresses_grouped_by_group
-      addresses.select(&:group).group_by(&:group)
+      addresses.select { |a| a.group }.group_by { |g| g.group }
     end
   end
 end
