@@ -52,6 +52,10 @@ module Mail
       string.gsub(TO_CRLF_REGEX, Constants::CRLF)
     end
 
+    def self.binary_unsafe_to_lf(string) # :nodoc:
+      string.gsub(/\r\n|\r/, Constants::LF)
+    end
+
     def self.safe_for_line_ending_conversion?(string)
       string.valid_encoding?
     end
@@ -77,6 +81,17 @@ module Mail
     #  dasherize( string ) #=> 'resent-from-field'
     def dasherize(str)
       str.gsub(Constants::UNDERSCORE, Constants::HYPHEN)
+    end
+
+    # Swaps out all hyphens (-) for underscores (_) good for stringing to symbols
+    # a field name.
+    #
+    # Example:
+    #
+    #  string = :resent_from_field
+    #  underscoreize ( string ) #=> 'resent_from_field'
+    def underscoreize(str)
+      str.to_s.downcase.tr(Constants::HYPHEN, Constants::UNDERSCORE)
     end
 
     # Returns true if the object is considered blank.

@@ -60,7 +60,7 @@ module Mail
       # "content-transfer-encoding" => ContentTransferEncodingField,
       # "content-description" => ContentDescriptionField,
       # "content-disposition" => ContentDispositionField,
-      # "content-type" => ContentTypeField,
+      "content-type" => ContentTypeField,
       # "content-id" => ContentIdField,
       # "content-location" => ContentLocationField,
     }
@@ -215,28 +215,18 @@ module Mail
       @field_order_id ||= FIELD_ORDER_LOOKUP.fetch(self.name.to_s.downcase, 100)
     end
 
-    def singular?
-      field.not_nil!.singular?
-    end
+    # def singular?
+    #   field.not_nil!.singular?
+    # end
 
-    def default
-      field.not_nil!.default
-    end
+    # def default
+    #   field.not_nil!.default
+    # end
 
     # TODO: Handle this...
-    # def method_missing(name, *args, &block)
-    #   field.send(name, *args, &block)
-    # end
-
-    # if RUBY_VERSION >= '1.9.2'
-    #   def respond_to_missing?(method_name, include_private)
-    #     field.respond_to?(method_name, include_private) || super
-    #   end
-    # else
-    #   def respond_to?(method_name, include_private = false)
-    #     field.respond_to?(method_name, include_private) || super
-    #   end
-    # end
+    macro method_missing(call)
+      field.not_nil!.{{call.name.id}}({{*call.args}})
+    end
 
     FIELD_ORDER_LOOKUP = %w[
       return-path received

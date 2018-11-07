@@ -31916,7 +31916,6 @@ module Mail::Parsers
 
       data = data.not_nil!
       data = data.dup.encode("ASCII") if data.responds_to?(:encode)
-      # data = data.not_nil!
 
       qstr : String? = group_name : String? = nil
       phrase_s : Int32? = phrase_e : Int32? = qstr_s : Int32? = comment_s : Int32? = nil
@@ -33187,7 +33186,7 @@ module Mail::Parsers
       end
 
       if p != eof || cs < 2461
-        raise Field::IncompleteParseError.new(Mail::AddressList, String.new(data), p)
+        raise Field::IncompleteParseError.new(AddressList, String.new(data), p)
       end
 
       address_list

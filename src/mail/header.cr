@@ -47,7 +47,7 @@ module Mail
       @charset = charset
       @raw_source = Utilities.to_crlf(header_text).lstrip
       @fields = FieldList.new
-      split_header if header_text
+      split_header if !Utilities.blank? header_text
     end
 
     # def initialize_copy(original)
@@ -136,27 +136,28 @@ module Mail
     #  h['X-Mail-SPAM'] # => ['15', '20', '10000']
     #  h['X-Mail-SPAM'] = nil
     #  h['X-Mail-SPAM'] # => nil
-    # def []=(name, value)
-    #   name = name.to_s
-    #   if name.include?(Constants::COLON)
-    #     raise ArgumentError, "Header names may not contain a colon: #{name.inspect}"
-    #   end
+    def []=(name, value)
+      name = name.to_s
+      if name.includes?(Constants::COLON)
+        raise ArgumentError.new "Header names may not contain a colon: #{name.inspect}"
+      end
 
-    #   name = Utilities.dasherize(name)
+      name = Utilities.dasherize(name)
 
-    #   # Assign nil to delete the field
-    #   if value.nil?
-    #     fields.delete_field name
-    #   else
-    #     fields.add_field Field.new(name.to_s, value, charset)
+      # Assign nil to delete the field
+      if value.nil?
+        fields.delete_field name
+      else
+        fields.add_field Field.new(name.to_s, value, charset)
 
-    #     # Update charset if specified in Content-Type
-    #     if name == 'content-type'
-    #       params = self[:content_type].parameters rescue nil
-    #       @charset = params[:charset] if params && params[:charset]
-    #     end
-    #   end
-    # end
+        # TODO: Fix parameters in content-type....
+        # Update charset if specified in Content-Type
+        # if name == 'content-type'
+        #   params = self["content_type"].parameters rescue nil
+        #   @charset = params["charset"] if params && params[:charset]
+        # end
+      end
+    end
 
     # def charset=(val)
     #   params = self[:content_type].parameters rescue nil
