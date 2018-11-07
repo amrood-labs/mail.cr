@@ -215,15 +215,6 @@ module Mail
       @field_order_id ||= FIELD_ORDER_LOOKUP.fetch(self.name.to_s.downcase, 100)
     end
 
-    # def singular?
-    #   field.not_nil!.singular?
-    # end
-
-    # def default
-    #   field.not_nil!.default
-    # end
-
-    # TODO: Handle this...
     macro method_missing(call)
       field.not_nil!.{{call.name.id}}({{*call.args}})
     end

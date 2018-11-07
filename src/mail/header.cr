@@ -151,25 +151,28 @@ module Mail
         fields.add_field Field.new(name.to_s, value, charset)
 
         # TODO: Fix parameters in content-type....
+        # ISSUE: undefined method 'parameters' for Array(Mail::Field) (compile-time type is (Array(Mail::Field) | Mail::Field))
         # Update charset if specified in Content-Type
-        # if name == 'content-type'
-        #   params = self["content_type"].parameters rescue nil
-        #   @charset = params["charset"] if params && params[:charset]
+        # if name == "content-type" && !self["content_type"].is_a?(Array)
+        #   params = self["content_type"].not_nil!.parameters
+        #   @charset = params["charset"] if params["charset"]
         # end
       end
     end
 
-    # def charset=(val)
-    #   params = self[:content_type].parameters rescue nil
-    #   if params
-    #     params[:charset] = val
-    #   end
-    #   @charset = val
-    # end
+    # TODO: Fix parameters in content-type....
+    # ISSUE: undefined method 'parameters' for Array(Mail::Field) (compile-time type is (Array(Mail::Field) | Mail::Field))
+    def charset=(val)
+      # params = self["content_type"].parameters rescue nil
+      # if params
+      #   params["charset"] = val
+      # end
+      @charset = val
+    end
 
     # def encoded
     #   buffer = String.new
-    #   buffer.force_encoding('us-ascii') if buffer.respond_to?(:force_encoding)
+    #   buffer.force_encoding('us-ascii') if buffer.responds_to?(:force_encoding)
     #   fields.each do |field|
     #     buffer << field.encoded
     #   end

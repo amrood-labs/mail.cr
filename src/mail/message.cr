@@ -9,6 +9,7 @@ module Mail
     @header : Header = Header.new("", @@charset)
     @text_part : Part? = nil
     @separate_parts : Bool = false
+    @charset : String = @@charset
     property raw_source : String = ""
 
     def initialize(raw_source = "", @body : Body = Body.new)
@@ -19,6 +20,13 @@ module Mail
         init_with_string(raw_source)
       end
     end
+
+    # def initialize(raw_source = "", @body : Body = Body.new, &block)
+    #   initialize(raw_source, @body)
+    #   if block_given?
+    #     yield self
+    #   end
+    # end
 
     def content_type(val = nil)
       default "content_type", val
@@ -189,7 +197,18 @@ module Mail
 
     # Returns the content type parameters
     def content_type_parameters
-      has_content_type? ? (header.nil? ? nil : header.not_nil!["content_type"].parameters) : nil rescue nil
+      has_content_type? ? header["content_type"].parameters : nil
+    end
+
+    # Returns the character set defined in the content type field
+    def charset
+      has_content_type? ? content_type_parameters["charset"] : @charset
+    end
+
+    # Sets the charset to the supplied value.
+    def charset=(value)
+      @charset = value
+      @header.charset = value
     end
 
     # Returns true if the message is multipart
@@ -200,6 +219,11 @@ module Mail
     # Returns the current boundary for this message part
     def boundary
       content_type_parameters ? content_type_parameters["boundary"] : nil
+    end
+
+    # Returns a parts list object of all the parts in the message
+    def parts
+      body.parts
     end
 
     def set_envelope(raw_envelope : String)
@@ -254,14 +278,15 @@ module Mail
     # end
 
     # Accessor for text_part
-    # def text_part(&block)
-    #   # if block_given?
-    #   #   self.text_part = Mail::Part.new(:content_type => 'text/plain', &block)
-    #   # else
-    #   #   @text_part || find_first_mime_type('text/plain')
-    #   # end
-    #   @text_part || find_first_mime_type("text/plain")
-    # end
+    def text_part
+      # puts @text_part
+      # puts parts.size
+      @text_part || find_first_mime_type("text/plain")
+    end
+
+    def text_part(&block)
+      self.text_part = Part.new(&block)
+    end
 
     # Helper to add a text part to a multipart/alternative email.  If this and
     # html_part are both defined in a message, then it will be a multipart/alternative
@@ -327,6 +352,15 @@ module Mail
       else
         @body_raw = value
       end
+    end
+
+    def all_parts
+      parts.map { |p| [p, p.all_parts] of Mail::Part | Array(Mail::Part) }.flatten
+    end
+
+    def find_first_mime_type(ct)
+      # TODO: Add this check as well => && !p.attachment?
+      all_parts.find { |p| p.content_type == ct }
     end
 
     private def process_body_raw

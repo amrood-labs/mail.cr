@@ -3,18 +3,7 @@
 module Mail
   module Constants
     white_space = %q|\x9\x20|
-    # text = %q||
-    # field_name = %q||
     qp_safe = %q|\x20-\x3c\x3e-\x7e|
-
-    aspecial = %q|()<>[]:;@\\,."|   # RFC5322
-    tspecial = %q|()<>@,;:\\"/[]?=| # RFC2045
-    sp = %q| |
-    control = %q|\x00-\x1f\x7f-\xff|
-
-    # if control.respond_to?(:force_encoding)
-    #   control = control.dup.force_encoding(Encoding::BINARY)
-    # end
 
     LAX_CRLF     = /\r?\n/
     WSP          = /[\x9\x20]/
@@ -29,12 +18,13 @@ module Mail
     HEADER_LINE  = /^([\x21-\x39\x3b-\x7e]+:\s*.+)$/
     HEADER_SPLIT = /#{LAX_CRLF}(?!#{WSP})/
 
-    QP_UNSAFE = /[^#{qp_safe}]/
-    QP_SAFE   = /[#{qp_safe}]/
-    # CONTROL_CHAR  = /[#{control}]/n
-    # ATOM_UNSAFE   = /[#{Regexp.quote aspecial}#{control}#{sp}]/n
-    # PHRASE_UNSAFE = /[#{Regexp.quote aspecial}#{control}]/n
-    # TOKEN_UNSAFE  = /[#{Regexp.quote tspecial}#{control}#{sp}]/n
+    QP_UNSAFE    = /[^#{qp_safe}]/
+    QP_SAFE      = /[#{qp_safe}]/
+    CONTROL_CHAR = /[\x00-\x1f\x7f-\xff]/
+
+    ATOM_UNSAFE        = /[\(\)\<\>\[\]\:;@\\\\,\.\"\x00-\x1f\x7f-\xff ]/
+    PHRASE_UNSAFE      = /[\(\)\<\>\[\]\:;@\\\\,\.\"\x00-\x1f\x7f-\xff]/
+    TOKEN_UNSAFE       = /[\(\)<>@,;:\\\\\"\/\[\]\?=\x00-\x1f\x7f-\xff ]/
     ENCODED_VALUE      = /\=\?([^?]+)\?([QB])\?[^?]*?\?\=/mi
     FULL_ENCODED_VALUE = /(\=\?[^?]+\?[QB]\?[^?]*?\?\=)/mi
 

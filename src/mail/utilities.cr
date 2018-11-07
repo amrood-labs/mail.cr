@@ -4,6 +4,17 @@ module Mail
   module Utilities
     extend self
 
+    # Returns true if the string supplied is free from characters not allowed as an ATOM
+    def atom_safe?(str)
+      !Constants::ATOM_UNSAFE === str
+    end
+
+    # If the string supplied has ATOM unsafe characters in it, will return the string quoted
+    # in double quotes, otherwise returns the string unmodified
+    def quote_atom(str)
+      atom_safe?(str) ? str : dquote(str)
+    end
+
     # If the string supplied has PHRASE unsafe characters in it, will return the string quoted
     # in double quotes, otherwise returns the string unmodified
     # TODO: Fix the quotation of unsafe phrases...
@@ -20,6 +31,49 @@ module Mail
       #   Constants::PHRASE_UNSAFE === str ? dquote(str) : str
       # end
       str
+    end
+
+    # Returns true if the string supplied is free from characters not allowed as a TOKEN
+    def token_safe?(str)
+      !Constants::TOKEN_UNSAFE === str
+    end
+
+    # If the string supplied has TOKEN unsafe characters in it, will return the string quoted
+    # in double quotes, otherwise returns the string unmodified
+    def quote_token(str)
+      token_safe?(str) ? str : dquote(str)
+    end
+
+    # Wraps supplied string in double quotes and applies \-escaping as necessary,
+    # unless it is already wrapped.
+    #
+    # Example:
+    #
+    #  string = 'This is a string'
+    #  dquote(string) #=> '"This is a string"'
+    #
+    #  string = 'This is "a string"'
+    #  dquote(string #=> '"This is \"a string\"'
+    def dquote(str)
+      "\"" + unquote(str).gsub(/[\\"]/) { |s| '\\' + s } + "\""
+    end
+
+    # Unwraps supplied string from inside double quotes and
+    # removes any \-escaping.
+    #
+    # Example:
+    #
+    #  string = '"This is a string"'
+    #  unquote(string) #=> 'This is a string'
+    #
+    #  string = '"This is \"a string\""'
+    #  unqoute(string) #=> 'This is "a string"'
+    def unquote(str)
+      if str =~ /^"(.*?)"$/
+        unescape($1)
+      else
+        str
+      end
     end
 
     # Escape parenthesies in a string
