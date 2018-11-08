@@ -29,7 +29,7 @@ module Mail
 
     # Returns the raw source that the body was initialized with, without
     # any tampering
-    getter raw_source : String?
+    getter raw_source : String
     getter parts : PartsList
 
     # Returns and sets the original character encoding
@@ -51,18 +51,7 @@ module Mail
       @charset = nil
       @part_sort_order = ["text/plain", "text/enriched", "text/html", "multipart/alternative"]
       @parts = PartsList.new
-      if Utilities.blank?(string)
-        @raw_source = ""
-      else
-        # Do join first incase we have been given an Array in Ruby 1.9
-        if string.responds_to?(:join)
-          @raw_source = Utilities.to_crlf(string.join(""))
-        elsif string.responds_to?(:to_s)
-          @raw_source = Utilities.to_crlf(string.to_s)
-        else
-          raise "You can only assign a string or an object that responds_to? :join or :to_s to a body."
-        end
-      end
+      @raw_source = string
       @encoding = default_encoding
       set_charset
     end
@@ -189,7 +178,6 @@ module Mail
     end
 
     def decoded
-      puts encoding
       if !Encodings.defined?(encoding)
         raise UnknownEncodingType.new("Don't know how to decode #{encoding}, please call #encoded and decode it yourself.")
       else
@@ -242,7 +230,7 @@ module Mail
       self.preamble = parts[0].to_s.strip
       # Make the epilogue equal to the epilogue (if any)
       self.epilogue = parts[-1].to_s.strip
-      parts[1...-1].to_a.each { |part| @parts << Mail::Part.new(part) }
+      parts[1...-1].to_a.each { |part| @parts << Part.new(part) }
       self
     end
 
@@ -263,14 +251,14 @@ module Mail
       parts_regex = /
         (?:                    # non-capturing group
           \A                |  # start of string OR
-          \r\n                 # line break
-         )
-        (
-          --#{Regexp.escape(boundary || "")}  # boundary delimiter
-          (?:--)?                             # with non-capturing optional closing
+          \s                   # line break
         )
-        (?=\s*$)                              # lookahead matching zero or more spaces followed by line-ending
+        (
+          \-\-#{Regex.escape(boundary || "")}   # boundary delimiter
+          (?:\-\-)?                             # with non-capturing optional closing
+        )
       /x
+
       parts = raw_source.split(parts_regex).each_slice(2).to_a
       parts.each_with_index { |(part, _), index| parts.delete_at(index) if index > 0 && Utilities.blank?(part) }
 
@@ -278,7 +266,7 @@ module Mail
         final_separator = parts[-2][1]
         parts << [""] if final_separator != "--#{boundary}--"
       end
-      parts.map(&:first)
+      parts.map { |p| p.first }
     end
 
     private def crlf_boundary

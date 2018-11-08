@@ -215,8 +215,18 @@ module Mail
       @field_order_id ||= FIELD_ORDER_LOOKUP.fetch(self.name.to_s.downcase, 100)
     end
 
+    # def parameters
+    #   if typeof(field).is_a? ContentTypeField
+    #     field.not_nil!.parameters
+    #   else
+    #     raise NoMehtodError.new "This field should be a ContentTypeField to have a parameters function."
+    #   end
+    # end
+
     macro method_missing(call)
-      field.not_nil!.{{call.name.id}}({{*call.args}})
+      if field.not_nil!.responds_to? :{{call.name.id}}
+        field.not_nil!.{{call.name.id}}({{*call.args}})
+      end
     end
 
     FIELD_ORDER_LOOKUP = %w[
@@ -234,7 +244,7 @@ module Mail
       parse_field(name, value, charset)
     rescue e : Field::ParseError
       # TODO: Fix this......
-      # field = Mail::UnstructuredField.new(name, value)
+      # field = UnstructuredField.new(name, value)
       # field.errors << [name, value, e]
       # field
     end
@@ -244,14 +254,13 @@ module Mail
 
       if klass = field_class_for(name)
         klass.parse(value, charset)
-      else
-        # TODO: Fix this... Port OptionalField
-        # OptionalField.parse(name, value, charset)
       end
     end
 
     private def field_class_for(name)
       FIELDS_MAP[name.to_s.downcase]
+    rescue KeyError
+      OptionalField
     end
 
     # 2.2.3. Long Header Fields

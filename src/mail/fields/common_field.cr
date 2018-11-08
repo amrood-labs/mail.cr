@@ -69,6 +69,18 @@ module Mail
       ""
     end
 
+    def parameters
+      content_type_method
+    end
+
+    def main_type
+      content_type_method
+    end
+
+    def mime_type
+      content_type_method
+    end
+
     def responsible_for?(field_name)
       name.to_s.casecmp(field_name.to_s) == 0
     end
@@ -81,6 +93,10 @@ module Mail
       else
         value
       end
+    end
+
+    private def content_type_method
+      raise NotImplementedError.new "Field should be a ContentTypeField to have a main_type function."
     end
   end
 end

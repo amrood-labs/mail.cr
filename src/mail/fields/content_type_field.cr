@@ -13,6 +13,8 @@ module Mail
     @element : ContentTypeElement? = nil
     @parameters : ParameterHash = ParameterHash.new
 
+    setter :parameters
+
     def self.singular?
       true
     end
@@ -22,7 +24,7 @@ module Mail
     end
 
     def self.generate_boundary
-      "--==_mimepart_#{Mail.random_tag}"
+      "--==_mimepart_#{Random::Secure.hex}"
     end
 
     def initialize(value = nil, charset = nil)
@@ -64,7 +66,7 @@ module Mail
       @sub_type ||= element.not_nil!.sub_type
     end
 
-    def string
+    def mime_type
       "#{main_type}/#{sub_type}"
     end
 
@@ -123,7 +125,6 @@ module Mail
 
     # Various special cases from random emails found that I am not going to change
     # the parser for
-    # TODO: Fix sanitize regex...
     private def sanitize(val)
       # TODO: check if there are cases where whitespace is not a separator
       val = val

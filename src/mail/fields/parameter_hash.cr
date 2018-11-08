@@ -11,8 +11,8 @@ module Mail
   # Parameters are defined in RFC2045. Split keys are in RFC2231.
   class ParameterHash < Hash(String, String) # :nodoc:
     def [](key_name)
-      key_pattern = Regexp.escape(key_name.to_s)
-      pairs = [] of String
+      key_pattern = Regex.escape(key_name.to_s)
+      pairs = [] of Array(String)
       exact = nil
 
       each do |k, v|

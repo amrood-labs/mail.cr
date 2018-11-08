@@ -15,7 +15,7 @@ module Mail
     FIELD_BODY   = /.+/m
     FIELD_LINE   = /^[\x21-\x39\x3b-\x7e]+:\s*.+$/
     FIELD_SPLIT  = /^(#{FIELD_NAME})\s*:\s*(#{FIELD_BODY})?$/
-    HEADER_LINE  = /^([\x21-\x39\x3b-\x7e]+:\s*.+)$/
+    HEADER_LINE  = /([\x21-\x39\x3b-\x7e]+:\s*.+)/
     HEADER_SPLIT = /#{LAX_CRLF}(?!#{WSP})/
 
     QP_UNSAFE    = /[^#{qp_safe}]/

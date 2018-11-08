@@ -1,3 +1,4 @@
+require "uri"
 require "./encodings/*"
 
 module Mail
@@ -95,8 +96,9 @@ module Mail
     #  str = Mail::Encodings.param_decode("This%20is%20fun", 'iso-8559-1')
     #  str.encoding #=> 'ISO-8859-1'      ## Only on Ruby 1.9
     #  str #=> "This is fun"
+    # TODO: Add Support for metioned charsets...
     def self.param_decode(str, encoding)
-      RubyVer.param_decode(str, encoding)
+      str = URI.unescape(str)
     end
 
     # Decodes or encodes a string as needed for either Base64 or QP encoding types in

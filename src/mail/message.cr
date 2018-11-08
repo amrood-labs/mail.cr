@@ -8,12 +8,12 @@ module Mail
     @body_raw : String? = nil
     @header : Header = Header.new("", @@charset)
     @text_part : Part? = nil
+    @html_part : Part? = nil
     @separate_parts : Bool = false
     @charset : String = @@charset
     property raw_source : String = ""
 
     def initialize(raw_source = "", @body : Body = Body.new)
-      # @html_part = nil
       # @errors = nil
 
       if !Utilities.blank? raw_source
@@ -187,8 +187,14 @@ module Mail
 
     # Returns the main content type
     def main_type
-      content_type = header["content_type"]
-      content_type.responds_to?(:main_type) ? content_type.main_type : nil
+      ct = get_single_header("content_type")
+      ct.nil? ? nil : ct.not_nil!.main_type
+    end
+
+    # Returns the MIME media type of part we are on, this is taken from the content-type header
+    def mime_type
+      ct = get_single_header("content_type")
+      ct.nil? ? nil : ct.not_nil!.mime_type
     end
 
     def has_content_type?
@@ -197,12 +203,14 @@ module Mail
 
     # Returns the content type parameters
     def content_type_parameters
-      has_content_type? ? header["content_type"].parameters : nil
+      ct = get_single_header("content_type")
+      ct.nil? ? nil : ct.not_nil!.parameters
     end
 
     # Returns the character set defined in the content type field
     def charset
-      has_content_type? ? content_type_parameters["charset"] : @charset
+      params = content_type_parameters
+      params ? (params["charset"] rescue @charset) : @charset
     end
 
     # Sets the charset to the supplied value.
@@ -218,7 +226,7 @@ module Mail
 
     # Returns the current boundary for this message part
     def boundary
-      content_type_parameters ? content_type_parameters["boundary"] : nil
+      content_type_parameters ? content_type_parameters.not_nil!.["boundary"] : nil
     end
 
     # Returns a parts list object of all the parts in the message
@@ -277,15 +285,22 @@ module Mail
     #   end
     # end
 
+    # Accessor for html_part
+    def html_part
+      @html_part || find_first_mime_type("text/html")
+    end
+
+    def html_part(&block)
+      self.html_part = Part.new(content_type: "text/html", &block)
+    end
+
     # Accessor for text_part
     def text_part
-      # puts @text_part
-      # puts parts.size
       @text_part || find_first_mime_type("text/plain")
     end
 
     def text_part(&block)
-      self.text_part = Part.new(&block)
+      self.text_part = Part.new(content_type: "text/plain", &block)
     end
 
     # Helper to add a text part to a multipart/alternative email.  If this and
@@ -293,12 +308,15 @@ module Mail
     # message and set itself that way.
     def text_part=(msg)
       # Assign the text part and set multipart/alternative if there's an html part.
+      puts "here........"
+      puts msg
       if msg
         msg = Part.new(body: Body.new(msg)) if !msg.is_a?(Message)
 
         @text_part = msg
         @text_part.not_nil!.content_type = "text/plain" unless @text_part.not_nil!.has_content_type?
         # add_multipart_alternate_header if html_part
+        puts @text_part.inspect
         add_part @text_part
 
         # If nil, delete the text part and back out of multipart/alternative.
@@ -314,13 +332,14 @@ module Mail
 
     # Adds a part to the parts list or creates the part list
     def add_part(part)
+      puts "here as well..."
       if !body.multipart? && !Utilities.blank?(self.body.decoded)
         @text_part = Part.new(raw_source: "Content-Type: text/plain;")
         @text_part.not_nil!.body = body.decoded.to_s
         self.body << @text_part
         # add_multipart_alternate_header
       end
-      # add_boundary
+      add_boundary
       self.body << part
     end
 
@@ -360,13 +379,13 @@ module Mail
 
     def find_first_mime_type(ct)
       # TODO: Add this check as well => && !p.attachment?
-      all_parts.find { |p| p.content_type == ct }
+      all_parts.find { |p| p.mime_type == ct }
     end
 
     private def process_body_raw
-      @body = Body.new(@body_raw)
+      @body = Body.new(@body_raw.to_s)
       @body_raw = nil
-      # separate_parts if @separate_parts
+      separate_parts if @separate_parts
 
       # add_encoding_to_body
     end
@@ -388,6 +407,28 @@ module Mail
       set_envelope_header
       parse_message
       @separate_parts = multipart?
+    end
+
+    private def get_single_header(header_name)
+      requested_header = header[header_name]
+      if requested_header.is_a? Array
+        requested_header[0]
+        puts "here as well..."
+      else
+        requested_header
+      end
+    end
+
+    private def add_boundary
+      unless body.boundary && boundary
+        ct = get_single_header("content-type")
+        if ct
+          ct.not_nil!.parameters.not_nil!["boundary"] = ContentTypeField.generate_boundary
+        else
+          header["content-type"] = "multipart/mixed"
+        end
+        body.boundary = boundary
+      end
     end
   end
 end
