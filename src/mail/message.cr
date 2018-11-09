@@ -332,7 +332,6 @@ module Mail
 
     # Adds a part to the parts list or creates the part list
     def add_part(part)
-      puts "here as well..."
       if !body.multipart? && !Utilities.blank?(self.body.decoded)
         @text_part = Part.new(raw_source: "Content-Type: text/plain;")
         @text_part.not_nil!.body = body.decoded.to_s

@@ -1,12 +1,9 @@
 module Mail
-  class PartsList < Array(Part)
-    # @parts = [] of Part
-    # getter parts : Array(Part)
+  class PartsList
+    property parts : Array(Part)
 
-    # def initialize(*args)
-    #   @parts = Array.new(*args)
-    #   super @parts
-    # end
+    def initialize(@parts = [] of Part)
+    end
 
     # The #encode_with and #to_yaml methods are just implemented
     # for the sake of backward compatibility ; the delegator does
@@ -23,26 +20,12 @@ module Mail
     #   Mail::AttachmentsList.new(@parts)
     # end
 
-    # def collect
-    #   if block_given?
-    #     ary = PartsList.new
-    #     each { |o| ary << yield(o) }
-    #     ary
-    #   else
-    #     to_a
-    #   end
-    # end
-
-    # def map
-    #   collect
-    # end
+    def map(&block)
+      @parts.map { |p| yield(p) }
+    end
 
     def map!
       raise NoMethodError.new "#map! is not defined, please call #collect and create a new PartsList"
-    end
-
-    def collect!
-      raise NoMethodError.new "#collect! is not defined, please call #collect and create a new PartsList"
     end
 
     # def inspect_structure(parent_id = '')
@@ -102,6 +85,14 @@ module Mail
     #   }
     # end
 
+    def push(part)
+      @parts.push(part)
+    end
+
+    def <<(part)
+      push(part)
+    end
+
     def sort
       self.class.new(@parts.sort)
     end
@@ -109,13 +100,15 @@ module Mail
     def sort!(order)
       # stable sort should be used to maintain the relative order as the parts are added
       i = 0
-      sorted = sort_by! do |a|
+      sorted = @parts.sort_by! do |a|
         # OK, 10000 is arbitrary... if anyone actually wants to explicitly sort 10000 parts of a
         # single email message... please show me a use case and I'll put more work into this method,
         # in the meantime, it works :)
         get_order_value(a, order) << (i += 1)
       end
     end
+
+    delegate :size, :[], :empty?, to: @parts
 
     private def get_order_value(part, order)
       is_attachment = part.responds_to?(:attachment?) && part.attachment?

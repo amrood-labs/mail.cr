@@ -71,7 +71,7 @@ module Mail
     end
 
     def content_type
-      string
+      mime_type
     end
 
     def default

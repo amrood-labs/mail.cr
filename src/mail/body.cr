@@ -207,19 +207,12 @@ module Mail
     end
 
     # Returns true if there are parts defined in the body
-    # TODO: Fix multipart email rendering...
     def multipart?
-      # true unless parts.empty?
-      false
+      true unless parts.empty?
     end
 
     def <<(val)
-      if @parts
-        @parts << val.not_nil!
-      else
-        @parts = PartsList.new
-        @parts << val.not_nil!
-      end
+      @parts << val.not_nil!
     end
 
     def split!(boundary)

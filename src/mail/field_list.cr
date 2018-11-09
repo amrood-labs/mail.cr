@@ -2,13 +2,15 @@ module Mail
   # Field List class provides an enhanced array that keeps a list of
   # email fields in order.  And allows you to insert new fields without
   # having to worry about the order they will appear in.
-  class FieldList < Array(Field)
+  class FieldList
+    @fields = [] of Field
+
     def has_field?(field_name)
-      self.any? { |f| f.responsible_for? field_name }
+      @fields.any? { |f| f.responsible_for? field_name }
     end
 
     def select_fields(field_name)
-      self.select { |f| f.responsible_for? field_name }
+      @fields.select { |f| f.responsible_for? field_name }
     end
 
     def get_field(field_name)
@@ -32,14 +34,18 @@ module Mail
       end
     end
 
-    def <<(field)
+    def push(field)
       add_field(field)
     end
 
+    def <<(field)
+      push(field)
+    end
+
     def replace_field(field)
-      if first_offset = self.index { |f| f.responsible_for? field.name }
+      if first_offset = @fields.index { |f| f.responsible_for? field.name }
         delete_field field.name
-        insert first_offset, field
+        @fields.insert first_offset, field
       else
         insert_field field
       end
@@ -52,25 +58,25 @@ module Mail
     #   Licensed under <http://docs.python.org/license.html>
     #   From <http://hg.python.org/cpython/file/2.7/Lib/bisect.py>
     def insert_field(field)
-      lo, hi = 0, size
+      lo, hi = 0, @fields.size
       while lo < hi
         mid = (lo + hi).tdiv(2)
-        if field < self[mid]
+        if field < @fields[mid]
           hi = mid
         else
           lo = mid + 1
         end
       end
 
-      insert lo, field
+      @fields.insert lo, field
     end
 
     def delete_field(name)
-      reject { |f| f.responsible_for? name }
+      @fields.reject { |f| f.responsible_for? name }
     end
 
     def summary
-      map { |f| "<#{f.name}: #{f.value}>" }.join(", ")
+      @fields.map { |f| "<#{f.name}: #{f.value}>" }.join(", ")
     end
   end
 end
