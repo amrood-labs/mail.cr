@@ -3,9 +3,7 @@ require "../parser_tools"
 
 module Mail::Parsers
   module ContentTypeParser
-    extend Mail::ParserTools
-
-    # ContentTypeStruct = Struct.new(:main_type, :sub_type, :parameters, :error)
+    extend ParserTools
 
     struct ContentTypeStruct
       property main_type : String? = nil, sub_type : String? = nil,

@@ -23,7 +23,6 @@ module Mail
   # On encoding, the body will return the preamble, then each part joined by
   # the boundary, followed by a closing boundary string and then the epilogue.
   class Body
-    @boundary : String? = nil
     @ascii_only : Bool = true
     @encoding : String = "7bit"
 
@@ -216,7 +215,10 @@ module Mail
     end
 
     def split!(boundary)
-      self.boundary = boundary
+      # Return empty body if there is no boundary
+      return self unless boundary
+
+      @boundary = boundary
       parts = extract_parts
 
       # Make the preamble equal to the preamble (if any)

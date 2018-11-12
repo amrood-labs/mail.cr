@@ -26,7 +26,7 @@ module Mail
       end
 
       if pairs.empty? # Just dealing with a single value pair
-        super(exact || key_name)
+        super(exact || key_name) rescue nil
       else # Dealing with a multiple value pair or a single encoded value pair
         string = pairs.sort { |a, b| a.first.to_s <=> b.first.to_s }.map { |v| v.last }.join("")
         if mt = string.match(/([\w\-]+)?'(\w\w)?'(.*)/)

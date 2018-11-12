@@ -28,6 +28,14 @@ module Mail
     #   end
     # end
 
+    def content_transfer_encoding(val = nil)
+      default "content_transfer_encoding", val
+    end
+
+    def content_transfer_encoding=(val)
+      header["content_transfer_encoding"] = val
+    end
+
     def content_type(val = nil)
       default "content_type", val
     end
@@ -197,10 +205,6 @@ module Mail
       ct.nil? ? nil : ct.not_nil!.mime_type
     end
 
-    def has_content_type?
-      !!main_type
-    end
-
     # Returns the content type parameters
     def content_type_parameters
       ct = get_single_header("content_type")
@@ -219,11 +223,6 @@ module Mail
       @header.charset = value
     end
 
-    # Returns true if the message is multipart
-    def multipart?
-      has_content_type? ? !!(main_type =~ /^multipart$/i) : false
-    end
-
     # Returns the current boundary for this message part
     def boundary
       content_type_parameters ? content_type_parameters.not_nil!.["boundary"] : nil
@@ -232,6 +231,20 @@ module Mail
     # Returns a parts list object of all the parts in the message
     def parts
       body.parts
+    end
+
+    # Returns true if the message is multipart
+    def multipart?
+      has_content_type? ? !!(main_type =~ /^multipart$/i) : false
+    end
+
+    def has_content_type?
+      !!main_type
+    end
+
+    def has_content_transfer_encoding?
+      cte = get_single_header("content_transfer_encoding")
+      cte && Utilities.blank?(cte.errors)
     end
 
     def set_envelope(raw_envelope : String)
@@ -308,8 +321,6 @@ module Mail
     # message and set itself that way.
     def text_part=(msg)
       # Assign the text part and set multipart/alternative if there's an html part.
-      puts "here........"
-      puts msg
       if msg
         msg = Part.new(body: Body.new(msg)) if !msg.is_a?(Message)
 
@@ -386,11 +397,17 @@ module Mail
       @body_raw = nil
       separate_parts if @separate_parts
 
-      # add_encoding_to_body
+      add_encoding_to_body
     end
 
     private def separate_parts
       body.split!(boundary)
+    end
+
+    private def add_encoding_to_body
+      if has_content_transfer_encoding?
+        @body.encoding = content_transfer_encoding.to_s
+      end
     end
 
     private def set_envelope_header
@@ -412,7 +429,6 @@ module Mail
       requested_header = header[header_name]
       if requested_header.is_a? Array
         requested_header[0]
-        puts "here as well..."
       else
         requested_header
       end

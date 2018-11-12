@@ -12,9 +12,10 @@ module Mail
     extend Utilities
 
     @@transfer_encodings = {
-      "binary" => Binary,
-      "8bit"   => SevenBit,
-      "7bit"   => EightBit,
+      "binary"           => Binary,
+      "8bit"             => SevenBit,
+      "7bit"             => EightBit,
+      "quoted_printable" => QuotedPrintable,
     }
 
     # Register transfer encoding

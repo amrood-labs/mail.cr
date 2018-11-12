@@ -4,6 +4,9 @@ module Mail
   class CommonField # :nodoc:
 
     @@field_name : String = ""
+    @errors = [] of Array(String | Field::ParseError)
+
+    property errors : Array(Array(String | Field::ParseError))
 
     def self.singular?
       false
@@ -20,8 +23,6 @@ module Mail
     setter element
 
     def initialize(value = nil, charset = nil)
-      # @errors = []
-
       self.name = @@field_name
       self.value = value
       self.charset = charset || "utf-8"

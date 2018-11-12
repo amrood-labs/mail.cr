@@ -57,7 +57,7 @@ module Mail
       # "return-path" => ReturnPathField,
       # "received" => ReceivedField,
       # "mime-version" => MimeVersionField,
-      # "content-transfer-encoding" => ContentTransferEncodingField,
+      "content-transfer-encoding" => ContentTransferEncodingField,
       # "content-description" => ContentDescriptionField,
       # "content-disposition" => ContentDispositionField,
       "content-type" => ContentTypeField,
@@ -243,10 +243,9 @@ module Mail
     private def create_field(name, value, charset)
       parse_field(name, value, charset)
     rescue e : Field::ParseError
-      # TODO: Fix this......
-      # field = UnstructuredField.new(name, value)
-      # field.errors << [name, value, e]
-      # field
+      field = UnstructuredField.new(name, value)
+      field.errors << [name.to_s, value.to_s, e]
+      field
     end
 
     private def parse_field(name, value, charset)
