@@ -10,7 +10,7 @@ module Mail
       envelope_from = Parsers::EnvelopeFromParser.parse(string)
       @address = envelope_from.address
       # TODO: Fix date parsing...
-      @date_time = Time.now # .parse(envelope_from.ctime_date) if envelope_from.ctime_date
+      @date_time = Time.local # .parse(envelope_from.ctime_date) if envelope_from.ctime_date
     end
 
     # RFC 4155:
