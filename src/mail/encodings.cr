@@ -99,7 +99,7 @@ module Mail
     #  str #=> "This is fun"
     # TODO: Add Support for metioned charsets...
     def self.param_decode(str, encoding)
-      str = URI.unescape(str)
+      str = URI.decode(str)
     end
 
     # Decodes or encodes a string as needed for either Base64 or QP encoding types in

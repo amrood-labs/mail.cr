@@ -31963,7 +31963,7 @@ module Mail::Parsers
             _keys = cs << 1
             _inds = _index_offsets[cs]
             _slen = _key_spans[cs]
-            _wide = data[p].ord
+            _wide = data[p]
             _trans = if (_slen > 0 &&
                         _trans_keys[_keys] <= _wide &&
                         _wide <= _trans_keys[_keys + 1])
